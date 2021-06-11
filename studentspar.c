@@ -184,21 +184,6 @@ int main(int argc, char * argv[]){
         }
     }
 
-/*
-    for(int i=0; i<R; i++){
-        if(regions[i].mean > best_mean_region){
-            best_mean_region = regions[i].mean;
-            best_mean_region_index = i;
-        }
-        for(int j=0; j<C; j++){
-            if(regions[i].cities[j].mean > best_mean_city){
-                best_mean_city = regions[i].cities[j].mean;
-                best_city_index_i = i;
-                best_city_index_j = j;
-            }
-        }
-    }*/
-
     time = omp_get_wtime() - time;
 
     for(int i=0; i<R; i++){
