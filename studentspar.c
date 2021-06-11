@@ -58,7 +58,7 @@ float mean(int * vec, int size){
 }
 
 float sd(int * vec, int size, float mean){
-    float sum;
+    double sum;
     for(int i=0; i<size; i++){
         sum += pow(vec[i]-mean,2);
     }
@@ -114,21 +114,28 @@ int main(int argc, char * argv[]){
 
     time = omp_get_wtime();
 
+    #pragma omp parallel num_threads(8)
+    {
+        
+    }
+
     for(int i=0; i<R; i++){
         for(int j=0; j<C; j++){
             qsort(&(grades[i*(C*A) + j*A]), A, sizeof(int), cmpfunc);
         }
     }
 
-    for(int i=0; i<R; i++){
-        for(int j=0; j<C; j++){
-            regions[i].cities[j].min = grades[i*(C*A) + j*A];
-            regions[i].cities[j].max = grades[i*(C*A) + j*A + A-1];
-            regions[i].cities[j].median = median(&(grades[i*(C*A) + j*A]), A);
-            regions[i].cities[j].mean = mean(&(grades[i*(C*A) + j*A]), A);
-            regions[i].cities[j].sd = sd(&(grades[i*(C*A) + j*A]), A, regions[i].cities[j].mean);
-        }
+    for(int k=0; k<R*C; k++){
+        int region_id = (int)k/C;
+        int city_offset = k % C;
+        regions[region_id].cities[city_offset].min = grades[region_id*(C*A) + city_offset*A];
+        regions[region_id].cities[city_offset].max = grades[region_id*(C*A) + city_offset*A + A-1];
+        regions[region_id].cities[city_offset].median = median(&(grades[region_id*(C*A) + city_offset*A]), A);
+        regions[region_id].cities[city_offset].mean = mean(&(grades[region_id*(C*A) + city_offset*A]), A);
+        regions[region_id].cities[city_offset].sd = sd(&(grades[region_id*(C*A) + city_offset*A]), A, regions[region_id].cities[city_offset].mean);
+
     }
+
 /*
     for(int i=0; i<R; i++){
         for(int j=0; j<C; j++){
