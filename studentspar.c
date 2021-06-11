@@ -8,7 +8,7 @@ typedef struct{
     int max;
     float median; 
     float mean;
-    double sd;
+    float sd;
 }city;
 
 typedef struct{
@@ -16,7 +16,7 @@ typedef struct{
     int max;
     float median; 
     float mean;
-    double sd;
+    float sd;
     city * cities;
 }region;
 
@@ -25,9 +25,21 @@ typedef struct{
     int max;
     float median;
     float mean;
-    double sd;
+    float sd;
     region * regions;
 }country;
+
+
+
+/*
+int min_value(int * vec){
+    return vec[0];
+}
+
+int max_value(int * vec, int size){
+    return vec[size-1];
+}
+*/
 
 float median(int * vec, int size){
     if(size%2){
@@ -38,7 +50,7 @@ float median(int * vec, int size){
 }
 
 float mean(int * vec, int size){
-    double sum = 0;
+    float sum = 0;
     for(int i=0; i<size; i++){
         sum += vec[i];
     }
@@ -46,7 +58,7 @@ float mean(int * vec, int size){
 }
 
 float sd(int * vec, int size, float mean){
-    double sum;
+    float sum;
     for(int i=0; i<size; i++){
         sum += pow(vec[i]-mean,2);
     }
