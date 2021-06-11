@@ -3,6 +3,8 @@
 #include <omp.h>
 #include <math.h>
 
+#define T 8
+
 typedef struct{
     int min;
     int max;
@@ -114,83 +116,75 @@ int main(int argc, char * argv[]){
 
     time = omp_get_wtime();
 
-    #pragma omp parallel num_threads(8)
+    #pragma omp parallel num_threads(T) shared(grades)
     {
-        
-    }
-
-    for(int i=0; i<R; i++){
-        for(int j=0; j<C; j++){
-            qsort(&(grades[i*(C*A) + j*A]), A, sizeof(int), cmpfunc);
+        #pragma omp for
+        for(int k=0; k<R*C; k++){
+            int region_id = (int)k/C;
+            int city_offset = k % C;
+            qsort(&(grades[region_id*(C*A) + city_offset*A]), A, sizeof(int), cmpfunc);
+            regions[region_id].cities[city_offset].min = grades[region_id*(C*A) + city_offset*A];
+            regions[region_id].cities[city_offset].max = grades[region_id*(C*A) + city_offset*A + A-1];
+            regions[region_id].cities[city_offset].median = median(&(grades[region_id*(C*A) + city_offset*A]), A);
+            regions[region_id].cities[city_offset].mean = mean(&(grades[region_id*(C*A) + city_offset*A]), A);
+            regions[region_id].cities[city_offset].sd = sd(&(grades[region_id*(C*A) + city_offset*A]), A, regions[region_id].cities[city_offset].mean);
         }
-    }
 
-    for(int k=0; k<R*C; k++){
-        int region_id = (int)k/C;
-        int city_offset = k % C;
-        regions[region_id].cities[city_offset].min = grades[region_id*(C*A) + city_offset*A];
-        regions[region_id].cities[city_offset].max = grades[region_id*(C*A) + city_offset*A + A-1];
-        regions[region_id].cities[city_offset].median = median(&(grades[region_id*(C*A) + city_offset*A]), A);
-        regions[region_id].cities[city_offset].mean = mean(&(grades[region_id*(C*A) + city_offset*A]), A);
-        regions[region_id].cities[city_offset].sd = sd(&(grades[region_id*(C*A) + city_offset*A]), A, regions[region_id].cities[city_offset].mean);
-
-    }
-
-/*
-    for(int i=0; i<R; i++){
-        for(int j=0; j<C; j++){
-            printf("Reg %d - Cid %d: ", i, j);
-            for(int k=0; k<A; k++){
-                printf("%d ",grades[i*(C*A) + j*A + k]);
+        #pragma omp for
+        for(int i=0; i<R; i++){
+            qsort(&(grades[i*(C*A)]), C*A, sizeof(int), cmpfunc);
+            float sum = 0;
+            regions[i].min = grades[i*C*A];
+            regions[i].max = grades[i*C*A + C*A-1];
+            regions[i].median = median(&(grades[i*(C*A)]), C*A);
+            for(int j=0; j<C; j++){
+                sum += regions[i].cities[j].mean;
             }
-            printf("\n");
+            regions[i].mean = sum / C;
+            regions[i].sd = sd(&(grades[i*(C*A)]), C*A, regions[i].mean);
         }
-        printf("\n");
     }
-*/
-    for(int i=0; i<R; i++){
-        qsort(&(grades[i*(C*A)]), C*A, sizeof(int), cmpfunc);
-    }
-/*
-    for(int i=0; i<R; i++){
-        for(int j=0; j<C; j++){
-            printf("Reg %d - Cid %d: ", i, j);
-            for(int k=0; k<A; k++){
-                printf("%d ",grades[i*(C*A) + j*A + k]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
-*/
-
-    for(int i=0; i<R; i++){
-        float sum = 0;
-        regions[i].min = grades[i*C*A];
-        regions[i].max = grades[i*C*A + C*A-1];
-        regions[i].median = median(&(grades[i*(C*A)]), C*A);
-        for(int j=0; j<C; j++){
-            sum += regions[i].cities[j].mean;
-        }
-        regions[i].mean = sum / C;
-        regions[i].sd = sd(&(grades[i*(C*A)]), C*A, regions[i].mean);
-    }
-
+    
     qsort(grades, R*C*A, sizeof(int), cmpfunc);
 
     brasil.min = grades[0];
     brasil.max = grades[R*C*A-1];
     brasil.median = median(grades, R*C*A);
+
+    
     float sum = 0;
+
+    #pragma omp parallel for num_threads(T) shared(brasil) reduction(+: sum)
     for(int i=0; i<R; i++){
         sum += brasil.regions[i].mean;
     }
+    
     brasil.mean = sum / R;
     brasil.sd = sd(grades, R*C*A, brasil.mean);
 
     best_mean_region = -1;
     best_mean_city = -1;
 
+    #pragma omp parallel for num_threads(T) shared(regions) reduction(max: best_mean_region)
+    for(int i=0; i<R; i++){
+        if(regions[i].mean > best_mean_region){
+            best_mean_region = regions[i].mean;
+            best_mean_region_index = i;
+        }
+    }
+
+    #pragma omp parallel for num_threads(T) shared(regions) reduction(max: best_mean_city)
+    for(int i=0; i<C*R; i++){
+        int region_id = i/C;
+        int city_offset = i % C;
+        if(regions[region_id].cities[city_offset].mean > best_mean_city){
+            best_mean_city = regions[region_id].cities[city_offset].mean;
+            best_city_index_i = region_id;
+            best_city_index_j = city_offset;
+        }
+    }
+
+/*
     for(int i=0; i<R; i++){
         if(regions[i].mean > best_mean_region){
             best_mean_region = regions[i].mean;
@@ -203,7 +197,7 @@ int main(int argc, char * argv[]){
                 best_city_index_j = j;
             }
         }
-    }
+    }*/
 
     time = omp_get_wtime() - time;
 
