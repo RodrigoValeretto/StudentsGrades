@@ -51,7 +51,6 @@ int verify(int * vec, int size){
     return flag;
 }
 
-
 float median(int * vec, int size){
     if(size%2){
         return (float) vec[size/2];
