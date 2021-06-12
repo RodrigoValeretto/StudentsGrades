@@ -102,6 +102,8 @@ int main(int argc, char *argv[])
     fscanf(file, "%d", &A);
     fscanf(file, "%d", &seed);
 
+    fclose(file);
+
     regions = (region *)malloc(R * sizeof(region));
     for (int i = 0; i < R; i++)
     {
@@ -224,6 +226,15 @@ int main(int argc, char *argv[])
     printf("\nMelhor cidade: Regiao %d, Cidade %d\n", best_city_index_i, best_city_index_j);
 
     printf("\nTempo de resposta sem considerar E/S, em segundos: %.8fs\n", time);
+
+    free(grades);
+    for(int i=0; i<R; i++){
+        free(regions[i].cities);
+        free(brasil.regions[i].cities);
+    }
+    free(regions);
+    free(brasil.regions);
+
 
     return 0;
 }
