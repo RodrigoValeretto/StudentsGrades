@@ -1,3 +1,13 @@
+/*
+Grupo - 01
+Alunos:
+João Pedro Fidelis Belluzzo - 10716661
+Leonardo Cerce Guioto - 10716640
+Luis Fernando Costa de Oliveira - 10716532
+Rodrigo Augusto Valeretto - 10684792
+Thiago Daniel Cagnoni de Pauli - 10716629
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
