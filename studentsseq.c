@@ -6,16 +6,16 @@
 typedef struct{
     int min;
     int max;
-    float median; 
-    float mean;
+    double median; 
+    double mean;
     double sd;
 }city;
 
 typedef struct{
     int min;
     int max;
-    float median; 
-    float mean;
+    double median; 
+    double mean;
     double sd;
     city * cities;
 }region;
@@ -23,21 +23,21 @@ typedef struct{
 typedef struct{
     int min;
     int max;
-    float median;
-    float mean;
+    double median;
+    double mean;
     double sd;
     region * regions;
 }country;
 
-float median(int * vec, int size){
+double median(int * vec, int size){
     if(size%2){
-        return (float) vec[size/2];
+        return (double) vec[size/2];
     }else{
-        return ((float)vec[size/2] + (float)vec[size/2-1]) / 2;
+        return ((double)vec[size/2] + (double)vec[size/2-1]) / 2;
     }
 }
 
-float mean(int * vec, int size){
+double mean(int * vec, int size){
     double sum = 0;
     for(int i=0; i<size; i++){
         sum += vec[i];
@@ -45,7 +45,7 @@ float mean(int * vec, int size){
     return sum / size;
 }
 
-float sd(int * vec, int size, float mean){
+double sd(int * vec, int size, double mean){
     double sum;
     for(int i=0; i<size; i++){
         sum += pow(vec[i]-mean,2);
@@ -63,7 +63,7 @@ int main(int argc, char * argv[]){
     int best_mean_region_index, best_city_index_i, best_city_index_j;
     int *grades;
     double time;
-    float best_mean_region, best_mean_city; 
+    double best_mean_region, best_mean_city; 
     region * regions;
     country brasil;
 
@@ -146,7 +146,7 @@ int main(int argc, char * argv[]){
 */
 
     for(int i=0; i<R; i++){
-        float sum = 0;
+        double sum = 0;
         regions[i].min = grades[i*C*A];
         regions[i].max = grades[i*C*A + C*A-1];
         regions[i].median = median(&(grades[i*(C*A)]), C*A);
@@ -162,7 +162,7 @@ int main(int argc, char * argv[]){
     brasil.min = grades[0];
     brasil.max = grades[R*C*A-1];
     brasil.median = median(grades, R*C*A);
-    float sum = 0;
+    double sum = 0;
     for(int i=0; i<R; i++){
         sum += brasil.regions[i].mean;
     }
@@ -202,7 +202,7 @@ int main(int argc, char * argv[]){
             i, regions[i].min, regions[i].max, regions[i].median, regions[i].mean, regions[i].sd);
     }
 
-    printf("\nBrasil: menor: %d, maior: %d, mediana: %.2f, media: %.2f e DP: %.2f\n",
+    printf("\nBrasil: menor: %d, maior: %d, mediana: %.2f, media: %.8f e DP: %.2f\n",
     brasil.min, brasil.max, brasil.median, brasil.mean, brasil.sd);
 
     printf("\nMelhor regiao: Regiao %d\n",best_mean_region_index);

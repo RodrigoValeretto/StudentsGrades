@@ -8,26 +8,26 @@
 typedef struct{
     int min;
     int max;
-    float median; 
-    float mean;
-    float sd;
+    double median; 
+    double mean;
+    double sd;
 }city;
 
 typedef struct{
     int min;
     int max;
-    float median; 
-    float mean;
-    float sd;
+    double median; 
+    double mean;
+    double sd;
     city * cities;
 }region;
 
 typedef struct{
     int min;
     int max;
-    float median;
-    float mean;
-    float sd;
+    double median;
+    double mean;
+    double sd;
     region * regions;
 }country;
 
@@ -43,23 +43,23 @@ int max_value(int * vec, int size){
 }
 */
 
-float median(int * vec, int size){
+double median(int * vec, int size){
     if(size%2){
-        return (float) vec[size/2];
+        return (double) vec[size/2];
     }else{
-        return ((float)vec[size/2] + (float)vec[size/2-1]) / 2;
+        return ((double)vec[size/2] + (double)vec[size/2-1]) / 2;
     }
 }
 
-float mean(int * vec, int size){
-    float sum = 0;
+double mean(int * vec, int size){
+    double sum = 0;
     for(int i=0; i<size; i++){
         sum += vec[i];
     }
     return sum / size;
 }
 
-float sd(int * vec, int size, float mean){
+double sd(int * vec, int size, double mean){
     double sum;
     for(int i=0; i<size; i++){
         sum += pow(vec[i]-mean,2);
@@ -77,7 +77,7 @@ int main(int argc, char * argv[]){
     int best_mean_region_index, best_city_index_i, best_city_index_j;
     int *grades;
     double time;
-    float best_mean_region, best_mean_city; 
+    double best_mean_region, best_mean_city; 
     region * regions;
     country brasil;
 
@@ -122,6 +122,7 @@ int main(int argc, char * argv[]){
         for(int k=0; k<R*C; k++){
             int region_id = (int)k/C;
             int city_offset = k % C;
+
             qsort(&(grades[region_id*(C*A) + city_offset*A]), A, sizeof(int), cmpfunc);
             regions[region_id].cities[city_offset].min = grades[region_id*(C*A) + city_offset*A];
             regions[region_id].cities[city_offset].max = grades[region_id*(C*A) + city_offset*A + A-1];
@@ -133,7 +134,7 @@ int main(int argc, char * argv[]){
         #pragma omp for
         for(int i=0; i<R; i++){
             qsort(&(grades[i*(C*A)]), C*A, sizeof(int), cmpfunc);
-            float sum = 0;
+            double sum = 0;
             regions[i].min = grades[i*C*A];
             regions[i].max = grades[i*C*A + C*A-1];
             regions[i].median = median(&(grades[i*(C*A)]), C*A);
@@ -152,9 +153,9 @@ int main(int argc, char * argv[]){
     brasil.median = median(grades, R*C*A);
 
     
-    float sum = 0;
+    double sum = 0;
 
-    #pragma omp parallel for num_threads(T) shared(brasil) reduction(+: sum)
+    #pragma omp parallel for num_threads(T) shared(brasil) reduction(+ : sum)
     for(int i=0; i<R; i++){
         sum += brasil.regions[i].mean;
     }
@@ -165,15 +166,15 @@ int main(int argc, char * argv[]){
     best_mean_region = -1;
     best_mean_city = -1;
 
-    #pragma omp parallel for num_threads(T) shared(regions) reduction(max: best_mean_region)
+    //#pragma omp parallel for num_threads(T) shared(regions) reduction(max: best_mean_region)
     for(int i=0; i<R; i++){
         if(regions[i].mean > best_mean_region){
-            best_mean_region = regions[i].mean;
             best_mean_region_index = i;
+            best_mean_region = regions[i].mean;
         }
     }
 
-    #pragma omp parallel for num_threads(T) shared(regions) reduction(max: best_mean_city)
+    //#pragma omp parallel for num_threads(T) shared(regions) reduction(max: best_mean_city)
     for(int i=0; i<C*R; i++){
         int region_id = i/C;
         int city_offset = i % C;
@@ -188,7 +189,7 @@ int main(int argc, char * argv[]){
 
     for(int i=0; i<R; i++){
         for(int j=0; j<C; j++){
-            printf("Reg %d - Cid %d: menor: %d, maior: %d, mediana: %.2f, media: %.2f e DP: %.2f\n",
+            printf("Reg %d - Cid %d: menor: %d, maior: %d, mediana: %.2lf, media: %.2lf e DP: %.2lf\n",
             i, j, regions[i].cities[j].min, regions[i].cities[j].max, regions[i].cities[j].median, regions[i].cities[j].mean,
             regions[i].cities[j].sd);
         }
@@ -196,11 +197,11 @@ int main(int argc, char * argv[]){
     }
 
     for(int i=0; i<R; i++){
-        printf("Reg %d: menor: %d, maior: %d, mediana: %.2f, media: %.2f e DP: %.2f\n",
+        printf("Reg %d: menor: %d, maior: %d, mediana: %.2lf, media: %.2lf e DP: %.2lf\n",
             i, regions[i].min, regions[i].max, regions[i].median, regions[i].mean, regions[i].sd);
     }
 
-    printf("\nBrasil: menor: %d, maior: %d, mediana: %.2f, media: %.2f e DP: %.2f\n",
+    printf("\nBrasil: menor: %d, maior: %d, mediana: %.2lf, media: %.8f e DP: %.2lf\n",
     brasil.min, brasil.max, brasil.median, brasil.mean, brasil.sd);
 
     printf("\nMelhor regiao: Regiao %d\n",best_mean_region_index);
