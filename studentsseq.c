@@ -117,33 +117,10 @@ int main(int argc, char * argv[]){
             regions[i].cities[j].sd = sd(&(grades[i*(C*A) + j*A]), A, regions[i].cities[j].mean);
         }
     }
-/*
-    for(int i=0; i<R; i++){
-        for(int j=0; j<C; j++){
-            printf("Reg %d - Cid %d: ", i, j);
-            for(int k=0; k<A; k++){
-                printf("%d ",grades[i*(C*A) + j*A + k]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
-*/
+
     for(int i=0; i<R; i++){
         qsort(&(grades[i*(C*A)]), C*A, sizeof(int), cmpfunc);
     }
-/*
-    for(int i=0; i<R; i++){
-        for(int j=0; j<C; j++){
-            printf("Reg %d - Cid %d: ", i, j);
-            for(int k=0; k<A; k++){
-                printf("%d ",grades[i*(C*A) + j*A + k]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
-*/
 
     for(int i=0; i<R; i++){
         double sum = 0;

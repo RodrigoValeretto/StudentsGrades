@@ -34,16 +34,6 @@ typedef struct
     region *regions;
 } country;
 
-/*
-int min_value(int * vec){
-    return vec[0];
-}
-
-int max_value(int * vec, int size){
-    return vec[size-1];
-}
-*/
-
 double median(int *vec, int size)
 {
     if (size % 2)
@@ -138,13 +128,13 @@ int main(int argc, char *argv[])
         {
             int region_id = (int)k / C;
             int city_offset = k % C;
-
-            qsort(&(grades[region_id * (C * A) + city_offset * A]), A, sizeof(int), cmpfunc);
-            regions[region_id].cities[city_offset].min = grades[region_id * (C * A) + city_offset * A];
-            regions[region_id].cities[city_offset].max = grades[region_id * (C * A) + city_offset * A + A - 1];
-            regions[region_id].cities[city_offset].median = median(&(grades[region_id * (C * A) + city_offset * A]), A);
-            regions[region_id].cities[city_offset].mean = mean(&(grades[region_id * (C * A) + city_offset * A]), A);
-            regions[region_id].cities[city_offset].sd = sd(&(grades[region_id * (C * A) + city_offset * A]), A, regions[region_id].cities[city_offset].mean);
+            int city_id = k * A;
+            qsort(&(grades[city_id]), A, sizeof(int), cmpfunc);
+            regions[region_id].cities[city_offset].min = grades[city_id];
+            regions[region_id].cities[city_offset].max = grades[city_id + A - 1];
+            regions[region_id].cities[city_offset].median = median(&(grades[city_id]), A);
+            regions[region_id].cities[city_offset].mean = mean(&(grades[city_id]), A);
+            regions[region_id].cities[city_offset].sd = sd(&(grades[city_id]), A, regions[region_id].cities[city_offset].mean);
         }
 
 #pragma omp for
@@ -184,7 +174,6 @@ int main(int argc, char *argv[])
     best_mean_region = -1;
     best_mean_city = -1;
 
-    //#pragma omp parallel for num_threads(T) shared(regions)
     for (int i = 0; i < R; i++)
     {
 
@@ -196,7 +185,6 @@ int main(int argc, char *argv[])
        
     }
 
-    //#pragma omp parallel for num_threads(T) shared(regions)
     for (int i = 0; i < C * R; i++)
     {
         int region_id = i / C;
