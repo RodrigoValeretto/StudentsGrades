@@ -231,11 +231,8 @@ int main(int argc, char *argv[])
     free(grades);
     for(int i=0; i<R; i++){
         free(regions[i].cities);
-        free(brasil.regions[i].cities);
     }
     free(regions);
-    free(brasil.regions);
-
 
     return 0;
 }
