@@ -179,7 +179,7 @@ int main(int argc, char * argv[]){
             i, regions[i].min, regions[i].max, regions[i].median, regions[i].mean, regions[i].sd);
     }
 
-    printf("\nBrasil: menor: %d, maior: %d, mediana: %.2f, media: %.8f e DP: %.2f\n",
+    printf("\nBrasil: menor: %d, maior: %d, mediana: %.2f, media: %.2f e DP: %.2f\n",
     brasil.min, brasil.max, brasil.median, brasil.mean, brasil.sd);
 
     printf("\nMelhor regiao: Regiao %d\n",best_mean_region_index);
