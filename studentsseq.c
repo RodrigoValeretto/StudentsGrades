@@ -29,6 +29,7 @@ typedef struct{
     region * regions;
 }country;
 
+//Função para calcular mediana de um vetor vec de tamanho size
 double median(int * vec, int size){
     if(size%2){
         return (double) vec[size/2];
@@ -37,6 +38,7 @@ double median(int * vec, int size){
     }
 }
 
+//Função para calcular a média de um vetor vec de tamanho size
 double mean(int * vec, int size){
     double sum = 0;
     for(int i=0; i<size; i++){
@@ -45,6 +47,7 @@ double mean(int * vec, int size){
     return sum / size;
 }
 
+//Função para calcular desvio padrão de um vetor vec de tamanho size, com a média mean
 double sd(int * vec, int size, double mean){
     double sum;
     for(int i=0; i<size; i++){
@@ -53,13 +56,14 @@ double sd(int * vec, int size, double mean){
     return sqrt(sum / size);
 }
 
+//Função de comparação utilizada no quicksort
 int cmpfunc (const void * a, const void * b) {
    return ( *(int*)a - *(int*)b );
 }
 
 int main(int argc, char * argv[]){
     FILE * file;
-    int R, C, A, seed;
+    int R, C, A, seed; //Valores de entrada
     int best_mean_region_index, best_city_index_i, best_city_index_j;
     int *grades;
     double time;
@@ -67,12 +71,14 @@ int main(int argc, char * argv[]){
     region * regions;
     country brasil;
 
+    //Verificação da entrada
     if(argc != 2){
         printf("Wrong input!\n");
         printf("Usage: %s name_file.txt\n",argv[0]);
         return 1;
     }
 
+    //Abertura, checagem e leitura do arquivo
     file = fopen(argv[1],"rt");
 
     if(file == NULL){
@@ -85,13 +91,18 @@ int main(int argc, char * argv[]){
     fscanf(file, "%d", &A);
     fscanf(file, "%d", &seed);
 
+    fclose(file);
+
+    //Criação dos vetores referentes às regiões
     regions = (region*) malloc(R * sizeof(region));
     for(int i=0; i<R; i++){
+        //Criação dos vetores referentes às cidades
         regions[i].cities = (city*) malloc(C * sizeof(city));
     }
 
     brasil.regions = regions;
 
+    //Inicia a geração das notas com base na seed da entrada
     srand(seed);
 
     grades = (int*) malloc(R * C * A * sizeof(int));
@@ -100,14 +111,17 @@ int main(int argc, char * argv[]){
         grades[i] = rand() % 101;
     }
 
+    //Início da contagem do tempo
     time = omp_get_wtime();
 
+    //Realiza a ordenação dos vetores das notas de cada cidade
     for(int i=0; i<R; i++){
         for(int j=0; j<C; j++){
             qsort(&(grades[i*(C*A) + j*A]), A, sizeof(int), cmpfunc);
         }
     }
 
+    //Calcula os dados referentes às cidades
     for(int i=0; i<R; i++){
         for(int j=0; j<C; j++){
             regions[i].cities[j].min = grades[i*(C*A) + j*A];
@@ -118,10 +132,12 @@ int main(int argc, char * argv[]){
         }
     }
 
+    //Realiza a ordenação dos vetores das notas de cada região
     for(int i=0; i<R; i++){
         qsort(&(grades[i*(C*A)]), C*A, sizeof(int), cmpfunc);
     }
 
+    //Calcula os dados referentes às regiões
     for(int i=0; i<R; i++){
         double sum = 0;
         regions[i].min = grades[i*C*A];
@@ -134,8 +150,10 @@ int main(int argc, char * argv[]){
         regions[i].sd = sd(&(grades[i*(C*A)]), C*A, regions[i].mean);
     }
 
+    //Ordena todas as notas do país
     qsort(grades, R*C*A, sizeof(int), cmpfunc);
 
+    //Calcula os dados correspondentes a todas as notas do país
     brasil.min = grades[0];
     brasil.max = grades[R*C*A-1];
     brasil.median = median(grades, R*C*A);
@@ -146,6 +164,7 @@ int main(int argc, char * argv[]){
     brasil.mean = sum / R;
     brasil.sd = sd(grades, R*C*A, brasil.mean);
 
+    //Inicia o cálculo da melhor cidade e melhor região com base na média
     best_mean_region = -1;
     best_mean_city = -1;
 
@@ -163,8 +182,10 @@ int main(int argc, char * argv[]){
         }
     }
 
+    //Finaliza a contagem do tempo
     time = omp_get_wtime() - time;
 
+    //O código abaixo realiza a impressão dos resultados
     for(int i=0; i<R; i++){
         for(int j=0; j<C; j++){
             printf("Reg %d - Cid %d: menor: %d, maior: %d, mediana: %.2f, media: %.2f e DP: %.2f\n",

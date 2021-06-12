@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
 
     time = omp_get_wtime();
 
+//Paraleliza a ordenação das notas de cada cidade e os cálculos das informações referentes a cada cidade
 #pragma omp parallel num_threads(T) shared(grades)
     {
 #pragma omp for
@@ -161,7 +162,7 @@ int main(int argc, char *argv[])
     brasil.median = median(grades, R * C * A);
 
     double sum = 0;
-
+//Paraleliza o cálculo da soma das médias de todo o país através de uma redução de soma.
 #pragma omp parallel for num_threads(T) shared(brasil) reduction(+ : sum)
     for (int i = 0; i < R; i++)
     {
